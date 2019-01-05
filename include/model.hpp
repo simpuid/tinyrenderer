@@ -26,4 +26,6 @@ class Model
 	void loadFromFile(std::string path);
 	Triangle3d getTriangle(int index);
 	int getTraingleCount();
+	void drawWireframe(Image &image);
+	void draw(Image &image);
 };

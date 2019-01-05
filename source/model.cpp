@@ -78,3 +78,21 @@ Triangle3d Model::getTriangle(int index)
 	}
 	return triangle;
 }
+void Model::drawWireframe(Image &image)
+{
+	for (int i = 0; i < getTraingleCount(); i++)
+	{
+		Triangle3d triangle = getTriangle(i);
+		Color color(rand() % 255, rand() % 255, rand() % 255, 255);
+		triangle.drawWireframe(image, color);
+	}
+}
+void Model::draw(Image &image)
+{
+	for (int i = 0; i < getTraingleCount(); i++)
+	{
+		Triangle3d triangle = getTriangle(i);
+		Color color(rand() % 255, rand() % 255, rand() % 255, 255);
+		triangle.draw(image, color);
+	}
+}

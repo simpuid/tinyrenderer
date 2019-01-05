@@ -18,6 +18,6 @@ struct Triangle3d
 	Vector2f textureCordinates[3];
 
   public:
-	void draw(Image &image);
+	void draw(Image &image, Color color);
 	void drawWireframe(Image &Image, Color color);
 };
