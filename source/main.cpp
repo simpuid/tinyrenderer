@@ -12,7 +12,7 @@ using namespace std;
 
 int main()
 {
-	Image img(2000, 2000);
+	Image img(1000, 1000);
 	Model m;
 	m.loadFromFile("african_head.obj");
 	m.draw(img);

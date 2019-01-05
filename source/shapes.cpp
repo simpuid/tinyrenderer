@@ -33,33 +33,36 @@ void Line2d::draw(Image &image)
 }
 void Triangle3d::draw(Image &image, Color color)
 {
-	Vector2i vertexWorld[3];
+	Vector2f vertexWorld[3];
 	Vector2i scale(image.width * 0.5f, image.height * 0.5f);
+	Vector2i minimum{INT32_MAX, INT32_MAX}, maximum{INT32_MIN, INT32_MIN};
 	auto lambdaRound = [](float f) -> int { return (int)f; };
 	for (int i = 0; i < 3; i++)
 	{
-		vertexWorld[i] = Vector2i(lambdaRound((vertices[i].x + 1) * scale.x), lambdaRound((vertices[i].y + 1) * scale.y));
+		vertexWorld[i] = Vector2f(lambdaRound((vertices[i].x + 1) * scale.x), lambdaRound((vertices[i].y + 1) * scale.y));
+		minimum.x = vertexWorld[i].x - 1 < minimum.x ? vertexWorld[i].x - 1 : minimum.x;
+		minimum.y = vertexWorld[i].y - 1 < minimum.y ? vertexWorld[i].y - 1 : minimum.y;
+		maximum.x = vertexWorld[i].x + 1 > maximum.x ? vertexWorld[i].x + 1 : maximum.x;
+		maximum.y = vertexWorld[i].y + 1 > maximum.y ? vertexWorld[i].y + 1 : maximum.y;
 	}
-	if (vertexWorld[0].y > vertexWorld[1].y)
-		std::swap(vertexWorld[0], vertexWorld[1]);
-	if (vertexWorld[0].y > vertexWorld[2].y)
-		std::swap(vertexWorld[0], vertexWorld[2]);
-	if (vertexWorld[1].y > vertexWorld[2].y)
-		std::swap(vertexWorld[1], vertexWorld[2]);
-
-	auto lambdaGetPointOnLine = [lambdaRound](Vector2i start, Vector2i end, int y) {
-		double param = float(y - end.y) / float(start.y - end.y);
-		return Vector2i(round(start.x * param + (1 - param) * end.x), y);
-	};
-	auto lambdaFillTrapezium = [lambdaGetPointOnLine, lambdaRound](Vector2i line1Start, Vector2i line1End, Vector2i line2Start, Vector2i line2End, int startY, int endY, Image &image, Color color) {
-		for (int y{startY}; y < endY; y++)
+	for (int x{minimum.x}; x <= maximum.x; x++)
+	{
+		for (int y{minimum.y}; y <= maximum.y; y++)
 		{
-			Line2d line(lambdaGetPointOnLine(line1Start, line1End, y), lambdaGetPointOnLine(line2Start, line2End, y), color);
-			line.draw(image);
+			Vector2f side1 = vertexWorld[1] - vertexWorld[0];
+			Vector2f side2 = vertexWorld[2] - vertexWorld[0];
+			Vector2f point = Vector2f(x, y) - vertexWorld[0];
+			Vector3f parameters = Vector3f(side1.x, side2.x, -point.x) ^ Vector3f(side1.y, side2.y, -point.y);
+			if (parameters.z != 0)
+			{
+				parameters = parameters * (1 / parameters.z);
+				if (parameters.x >= 0 && parameters.y >= 0 && parameters.x + parameters.y <= 1)
+				{
+					image.setColor(x, y, color);
+				}
+			}
 		}
-	};
-	lambdaFillTrapezium(vertexWorld[0], vertexWorld[2], vertexWorld[0], vertexWorld[1], vertexWorld[0].y, vertexWorld[1].y, image, color);
-	lambdaFillTrapezium(vertexWorld[0], vertexWorld[2], vertexWorld[2], vertexWorld[1], vertexWorld[1].y, vertexWorld[2].y, image, color);
+	}
 }
 void Triangle3d::drawWireframe(Image &image, Color color)
 {
