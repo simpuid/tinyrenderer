@@ -17,7 +17,7 @@ int main()
 	ZBuffer buff(image.width, image.height);
 	Model m;
 	m.loadFromFile("african_head.obj");
-	m.draw(image, buff, *texture);
+	m.draw(image, *texture, buff);
 	Image::writeToFile(image, "wireframe.ppm", true);
 	return 0;
 }

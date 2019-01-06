@@ -34,7 +34,7 @@ void Line2d::draw(Image &image)
 		}
 	}
 }
-void Triangle3d::draw(Image &image, ZBuffer &zBuffer, Color color, Image &texture)
+void Triangle3d::draw(Image &image, Image &texture, ZBuffer &zBuffer, float intensity)
 {
 	Vector3f vertexWorld[3];
 	Vector2i scale(image.width * 0.5f, image.height * 0.5f);
@@ -64,7 +64,7 @@ void Triangle3d::draw(Image &image, ZBuffer &zBuffer, Color color, Image &textur
 					if (zBuffer.getBuffer(x, y) < zDepth)
 					{
 						Vector2f texturePosition = (textureCordinates[0] + (textureCordinates[1] - textureCordinates[0]) * parameters.x + (textureCordinates[2] - textureCordinates[0]) * parameters.y);
-						image.setColor(x, y, texture.getColor(texturePosition.x * texture.width, texturePosition.y * texture.height));
+						image.setColor(x, y, texture.getColor(texturePosition.x * texture.width, texturePosition.y * texture.height) * intensity);
 						zBuffer.setBuffer(x, y, zDepth);
 					}
 				}
