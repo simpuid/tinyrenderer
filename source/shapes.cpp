@@ -34,7 +34,7 @@ void Line2d::draw(Image &image)
 		}
 	}
 }
-void Triangle3d::draw(Image &image, ZBuffer &zBuffer, Color color)
+void Triangle3d::draw(Image &image, ZBuffer &zBuffer, Color color, Image &texture)
 {
 	Vector3f vertexWorld[3];
 	Vector2i scale(image.width * 0.5f, image.height * 0.5f);
@@ -47,12 +47,12 @@ void Triangle3d::draw(Image &image, ZBuffer &zBuffer, Color color)
 		maximum.x = vertexWorld[i].x + 1 > maximum.x ? vertexWorld[i].x + 1 : maximum.x;
 		maximum.y = vertexWorld[i].y + 1 > maximum.y ? vertexWorld[i].y + 1 : maximum.y;
 	}
+	Vector3f side1 = vertexWorld[1] - vertexWorld[0];
+	Vector3f side2 = vertexWorld[2] - vertexWorld[0];
 	for (int x{minimum.x}; x <= maximum.x; x++)
 	{
 		for (int y{minimum.y}; y <= maximum.y; y++)
 		{
-			Vector3f side1 = vertexWorld[1] - vertexWorld[0];
-			Vector3f side2 = vertexWorld[2] - vertexWorld[0];
 			Vector3f point = Vector3f(x, y, 0) - vertexWorld[0];
 			Vector3f parameters = Vector3f(side1.x, side2.x, -point.x) ^ Vector3f(side1.y, side2.y, -point.y);
 			if (parameters.z != 0)
@@ -60,10 +60,11 @@ void Triangle3d::draw(Image &image, ZBuffer &zBuffer, Color color)
 				parameters = parameters * (1 / parameters.z);
 				if (parameters.x >= 0 && parameters.y >= 0 && parameters.x + parameters.y <= 1)
 				{
-					float zDepth = (vertexWorld[0] + side1 * parameters.x + side2 * parameters.y).z;
+					float zDepth = (vertexWorld[0].z + side1.z * parameters.x + side2.z * parameters.y);
 					if (zBuffer.getBuffer(x, y) < zDepth)
 					{
-						image.setColor(x, y, color);
+						Vector2f texturePosition = (textureCordinates[0] + (textureCordinates[1] - textureCordinates[0]) * parameters.x + (textureCordinates[2] - textureCordinates[0]) * parameters.y);
+						image.setColor(x, y, texture.getColor(texturePosition.x * texture.width, texturePosition.y * texture.height));
 						zBuffer.setBuffer(x, y, zDepth);
 					}
 				}

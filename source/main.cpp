@@ -12,11 +12,12 @@ using namespace std;
 
 int main()
 {
-	Image img(1000, 1000);
-	ZBuffer buff(img.width, img.height);
+	Image *texture = Image::readFromFile("african_head_diffuse.ppm");
+	Image image(1000, 1000);
+	ZBuffer buff(image.width, image.height);
 	Model m;
 	m.loadFromFile("african_head.obj");
-	m.draw(img, buff);
-	Image::writeToFile(img, "wireframe.ppm", true);
+	m.draw(image, buff, *texture);
+	Image::writeToFile(image, "wireframe.ppm", true);
 	return 0;
 }

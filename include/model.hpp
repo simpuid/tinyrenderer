@@ -29,5 +29,5 @@ class Model
 	Triangle3d getTriangle(int index);
 	int getTraingleCount();
 	void drawWireframe(Image &image);
-	void draw(Image &image, ZBuffer &zbuffer);
+	void draw(Image &image, ZBuffer &zbuffer, Image &texture);
 };
