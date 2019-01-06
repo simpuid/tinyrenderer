@@ -38,7 +38,7 @@ struct Vector3
 	Vector3<T> operator^(Vector3<T> other) { return Vector3<T>(y * other.z - other.y * z, z * other.x - x * other.z, x * other.y - other.x * y); }
 	float magnitude() { return std::sqrt(x * x + y * y + z * z); };
 	T squareMagnitude() { return (x * x + y * y + z * z); }
-	Vector2<T> normalise(T length = 1) { return (*this = (*this) * (length / magnitude())); }
+	Vector3<T> normalise(T length = 1) { return (*this = (*this) * (length / magnitude())); }
 };
 template <class T>
 std::ostream &operator<<(std::ostream &stream, Vector2<T> vector2)

@@ -1,6 +1,8 @@
 #pragma once
+#include <color.hpp>
 #include <image.hpp>
 #include <vector.hpp>
+#include <zbuffer.hpp>
 
 struct Line2d
 {
@@ -18,6 +20,6 @@ struct Triangle3d
 	Vector2f textureCordinates[3];
 
   public:
-	void draw(Image &image, Color color);
+	void draw(Image &image, ZBuffer &zBuffer, Color color);
 	void drawWireframe(Image &Image, Color color);
 };

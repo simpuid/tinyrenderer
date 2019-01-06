@@ -1,7 +1,9 @@
 #include <model.hpp>
+#include <color.hpp>
 #include <vector>
 #include <string>
 #include <fstream>
+#include <zbuffer.hpp>
 
 Model::Model()
 {
@@ -12,6 +14,10 @@ Model::Model()
 }
 Model::~Model()
 {
+	vertexList->clear();
+	normalList->clear();
+	textureList->clear();
+	triangleList->clear();
 	delete vertexList;
 	delete normalList;
 	delete textureList;
@@ -87,12 +93,18 @@ void Model::drawWireframe(Image &image)
 		triangle.drawWireframe(image, color);
 	}
 }
-void Model::draw(Image &image)
+void Model::draw(Image &image, ZBuffer &zBuffer)
 {
+	Vector3f lightDirection(0, 0, 1.0f);
 	for (int i = 0; i < getTraingleCount(); i++)
 	{
 		Triangle3d triangle = getTriangle(i);
-		Color color(rand() % 255, rand() % 255, rand() % 255, 255);
-		triangle.draw(image, color);
+		Vector3f calculatedNormal = ((triangle.vertices[1] - triangle.vertices[0]) ^ (triangle.vertices[2] - triangle.vertices[0])).normalise();
+		float intensity = calculatedNormal * lightDirection;
+		if (intensity > 0)
+		{
+			Color color(255 * intensity, 255 * intensity, 255 * intensity, 255);
+			triangle.draw(image, zBuffer, color);
+		}
 	}
 }

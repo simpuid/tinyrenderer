@@ -9,7 +9,9 @@ main = 'source/main.cpp'
 sources = [
 	'source/image.cpp',
 	'source/shapes.cpp',
-	'source/model.cpp'
+	'source/model.cpp',
+	'source/color.cpp',
+	'source/zbuffer.cpp'
 ]
 
 #main executable

@@ -1,7 +1,10 @@
 #include <image.hpp>
+#include <color.hpp>
 #include <utility>
 #include <cmath>
 #include <shapes.hpp>
+#include <limits>
+#include <zbuffer.hpp>
 
 Line2d::Line2d(Vector2i start, Vector2i end, Color color) : start{start}, end{end}, color{color} {}
 void Line2d::draw(Image &image)
@@ -31,15 +34,14 @@ void Line2d::draw(Image &image)
 		}
 	}
 }
-void Triangle3d::draw(Image &image, Color color)
+void Triangle3d::draw(Image &image, ZBuffer &zBuffer, Color color)
 {
-	Vector2f vertexWorld[3];
+	Vector3f vertexWorld[3];
 	Vector2i scale(image.width * 0.5f, image.height * 0.5f);
-	Vector2i minimum{INT32_MAX, INT32_MAX}, maximum{INT32_MIN, INT32_MIN};
-	auto lambdaRound = [](float f) -> int { return (int)f; };
+	Vector2i minimum{std::numeric_limits<int>::max(), std::numeric_limits<int>::max()}, maximum{std::numeric_limits<int>::min(), std::numeric_limits<int>::min()};
 	for (int i = 0; i < 3; i++)
 	{
-		vertexWorld[i] = Vector2f(lambdaRound((vertices[i].x + 1) * scale.x), lambdaRound((vertices[i].y + 1) * scale.y));
+		vertexWorld[i] = Vector3f((vertices[i].x + 1) * scale.x, (vertices[i].y + 1) * scale.y, vertices[i].z);
 		minimum.x = vertexWorld[i].x - 1 < minimum.x ? vertexWorld[i].x - 1 : minimum.x;
 		minimum.y = vertexWorld[i].y - 1 < minimum.y ? vertexWorld[i].y - 1 : minimum.y;
 		maximum.x = vertexWorld[i].x + 1 > maximum.x ? vertexWorld[i].x + 1 : maximum.x;
@@ -49,16 +51,21 @@ void Triangle3d::draw(Image &image, Color color)
 	{
 		for (int y{minimum.y}; y <= maximum.y; y++)
 		{
-			Vector2f side1 = vertexWorld[1] - vertexWorld[0];
-			Vector2f side2 = vertexWorld[2] - vertexWorld[0];
-			Vector2f point = Vector2f(x, y) - vertexWorld[0];
+			Vector3f side1 = vertexWorld[1] - vertexWorld[0];
+			Vector3f side2 = vertexWorld[2] - vertexWorld[0];
+			Vector3f point = Vector3f(x, y, 0) - vertexWorld[0];
 			Vector3f parameters = Vector3f(side1.x, side2.x, -point.x) ^ Vector3f(side1.y, side2.y, -point.y);
 			if (parameters.z != 0)
 			{
 				parameters = parameters * (1 / parameters.z);
 				if (parameters.x >= 0 && parameters.y >= 0 && parameters.x + parameters.y <= 1)
 				{
-					image.setColor(x, y, color);
+					float zDepth = (vertexWorld[0] + side1 * parameters.x + side2 * parameters.y).z;
+					if (zBuffer.getBuffer(x, y) < zDepth)
+					{
+						image.setColor(x, y, color);
+						zBuffer.setBuffer(x, y, zDepth);
+					}
 				}
 			}
 		}

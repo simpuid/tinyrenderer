@@ -3,6 +3,8 @@
 #include <string>
 #include <vector.hpp>
 #include <shapes.hpp>
+#include <image.hpp>
+#include <zbuffer.hpp>
 
 class Model
 {
@@ -27,5 +29,5 @@ class Model
 	Triangle3d getTriangle(int index);
 	int getTraingleCount();
 	void drawWireframe(Image &image);
-	void draw(Image &image);
+	void draw(Image &image, ZBuffer &zbuffer);
 };
