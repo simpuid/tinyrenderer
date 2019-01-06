@@ -11,7 +11,8 @@ sources = [
 	'source/shapes.cpp',
 	'source/model.cpp',
 	'source/color.cpp',
-	'source/zbuffer.cpp'
+	'source/zbuffer.cpp',
+	'source/camera.cpp'
 ]
 
 #main executable

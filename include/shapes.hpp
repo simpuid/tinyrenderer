@@ -3,7 +3,7 @@
 #include <image.hpp>
 #include <vector.hpp>
 #include <zbuffer.hpp>
-
+#include <camera.hpp>
 struct Line2d
 {
 	Vector2i start;
@@ -20,6 +20,6 @@ struct Triangle3d
 	Vector2f textureCordinates[3];
 
   public:
-	void draw(Image &image, Image &texture, ZBuffer &zBuffer, float intensity);
+	void draw(Image &image, Image &texture, ZBuffer &zBuffer, TransformMatrix &matrix, float intensity);
 	void drawWireframe(Image &Image, Color color);
 };

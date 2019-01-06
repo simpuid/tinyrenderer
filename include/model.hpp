@@ -5,6 +5,7 @@
 #include <shapes.hpp>
 #include <image.hpp>
 #include <zbuffer.hpp>
+#include <camera.hpp>
 
 class Model
 {
@@ -29,5 +30,5 @@ class Model
 	Triangle3d getTriangle(int index);
 	int getTraingleCount();
 	void drawWireframe(Image &image);
-	void draw(Image &image, Image &texture, ZBuffer &zbuffer);
+	void draw(Image &image, Image &texture, ZBuffer &zbuffer, TransformMatrix matrix);
 };

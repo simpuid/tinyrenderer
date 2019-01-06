@@ -93,7 +93,7 @@ void Model::drawWireframe(Image &image)
 		triangle.drawWireframe(image, color);
 	}
 }
-void Model::draw(Image &image, Image &texture, ZBuffer &zBuffer)
+void Model::draw(Image &image, Image &texture, ZBuffer &zBuffer, TransformMatrix matrix)
 {
 	Vector3f lightDirection(0, 0, 1.0f);
 	for (int i = 0; i < getTraingleCount(); i++)
@@ -104,7 +104,7 @@ void Model::draw(Image &image, Image &texture, ZBuffer &zBuffer)
 		if (intensity > 0)
 		{
 			Color color(255 * intensity, 255 * intensity, 255 * intensity, 255);
-			triangle.draw(image, texture, zBuffer, intensity);
+			triangle.draw(image, texture, zBuffer, matrix, intensity);
 		}
 	}
 }

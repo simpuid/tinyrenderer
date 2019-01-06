@@ -34,7 +34,7 @@ void Line2d::draw(Image &image)
 		}
 	}
 }
-void Triangle3d::draw(Image &image, Image &texture, ZBuffer &zBuffer, float intensity)
+void Triangle3d::draw(Image &image, Image &texture, ZBuffer &zBuffer, TransformMatrix &matrix, float intensity)
 {
 	Vector3f vertexWorld[3];
 	Vector2i scale(image.width * 0.5f, image.height * 0.5f);

@@ -1,3 +1,4 @@
+#pragma once
 #include <initializer_list>
 template <unsigned int width, unsigned int height, class T>
 struct Matrix
