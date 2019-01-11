@@ -4,8 +4,9 @@
 #include <string>
 #include <fstream>
 #include <zbuffer.hpp>
+#include <iostream>
 
-Model::Model()
+Model::Model() : vertexList{new std::vector<Vector3f>()}, normalList{new std::vector<Vector3f>()}, textureList{new std::vector<Vector2f>()}, triangleList{new std::vector<Model::IndexedTriangle>()}
 {
 	vertexList = new std::vector<Vector3f>();
 	normalList = new std::vector<Vector3f>();
@@ -23,7 +24,7 @@ Model::~Model()
 	delete textureList;
 	delete triangleList;
 }
-void Model::loadFromFile(std::string path)
+Model::Model(std::string path) : vertexList{new std::vector<Vector3f>()}, normalList{new std::vector<Vector3f>()}, textureList{new std::vector<Vector2f>()}, triangleList{new std::vector<Model::IndexedTriangle>()}
 {
 	std::ifstream file;
 	file.open(path);
@@ -35,7 +36,7 @@ void Model::loadFromFile(std::string path)
 		{
 			float x, y, z;
 			file >> x >> y >> z;
-			vertexList->push_back(Vector3f(x, y, z));
+			vertexList->push_back((Vector3f(x, y, z)));
 		}
 		else if (header == "vt")
 		{
@@ -93,18 +94,13 @@ void Model::drawWireframe(Image &image)
 		triangle.drawWireframe(image, color);
 	}
 }
-void Model::draw(Image &image, Image &texture, ZBuffer &zBuffer, TransformMatrix matrix)
+void Model::draw(Image &image, Image &texture, ZBuffer &zBuffer, TransformMatrix matrix, TransformMatrix normalMatrix, Vector3f lightDirection)
 {
-	Vector3f lightDirection(0, 0, 1.0f);
 	for (int i = 0; i < getTraingleCount(); i++)
 	{
 		Triangle3d triangle = getTriangle(i);
 		Vector3f calculatedNormal = ((triangle.vertices[1] - triangle.vertices[0]) ^ (triangle.vertices[2] - triangle.vertices[0])).normalise();
 		float intensity = calculatedNormal * lightDirection;
-		if (intensity > 0)
-		{
-			Color color(255 * intensity, 255 * intensity, 255 * intensity, 255);
-			triangle.draw(image, texture, zBuffer, matrix, intensity);
-		}
+		triangle.draw(image, texture, zBuffer, matrix, lightDirection);
 	}
 }

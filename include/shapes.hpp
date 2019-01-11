@@ -20,6 +20,6 @@ struct Triangle3d
 	Vector2f textureCordinates[3];
 
   public:
-	void draw(Image &image, Image &texture, ZBuffer &zBuffer, TransformMatrix &matrix, float intensity);
+	void draw(Image &image, Image &texture, ZBuffer &zBuffer, TransformMatrix &matrix, Vector3f lightDirection);
 	void drawWireframe(Image &Image, Color color);
 };

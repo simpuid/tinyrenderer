@@ -26,9 +26,9 @@ class Model
   public:
 	Model();
 	~Model();
-	void loadFromFile(std::string path);
+	Model(std::string path);
 	Triangle3d getTriangle(int index);
 	int getTraingleCount();
 	void drawWireframe(Image &image);
-	void draw(Image &image, Image &texture, ZBuffer &zbuffer, TransformMatrix matrix);
+	void draw(Image &image, Image &texture, ZBuffer &zbuffer, TransformMatrix matrix, TransformMatrix normalMatrix, Vector3f lightDirection);
 };

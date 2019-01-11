@@ -5,6 +5,8 @@
 #include <shapes.hpp>
 #include <limits>
 #include <zbuffer.hpp>
+#include <iostream>
+#include <cmath>
 
 Line2d::Line2d(Vector2i start, Vector2i end, Color color) : start{start}, end{end}, color{color} {}
 void Line2d::draw(Image &image)
@@ -34,38 +36,42 @@ void Line2d::draw(Image &image)
 		}
 	}
 }
-void Triangle3d::draw(Image &image, Image &texture, ZBuffer &zBuffer, TransformMatrix &matrix, float intensity)
+void Triangle3d::draw(Image &image, Image &texture, ZBuffer &zBuffer, TransformMatrix &matrix, Vector3f lightDirection)
 {
 	Vector3f vertexWorld[3];
-	Vector2i scale(image.width * 0.5f, image.height * 0.5f);
 	Vector2i minimum{std::numeric_limits<int>::max(), std::numeric_limits<int>::max()}, maximum{std::numeric_limits<int>::min(), std::numeric_limits<int>::min()};
 	for (int i = 0; i < 3; i++)
 	{
-		vertexWorld[i] = Vector3f((vertices[i].x + 1) * scale.x, (vertices[i].y + 1) * scale.y, vertices[i].z);
-		minimum.x = vertexWorld[i].x - 1 < minimum.x ? vertexWorld[i].x - 1 : minimum.x;
-		minimum.y = vertexWorld[i].y - 1 < minimum.y ? vertexWorld[i].y - 1 : minimum.y;
-		maximum.x = vertexWorld[i].x + 1 > maximum.x ? vertexWorld[i].x + 1 : maximum.x;
-		maximum.y = vertexWorld[i].y + 1 > maximum.y ? vertexWorld[i].y + 1 : maximum.y;
+		Matrixf<1, 4> vertex{{vertices[i].x, vertices[i].y, vertices[i].z, 1.0f}};
+		Matrixf<1, 4> result = matrix * vertex;
+		vertexWorld[i] = Vector3f{result.data(0, 0) / result.data(0, 3), result.data(0, 1) / result.data(0, 3), result.data(0, 2) / result.data(0, 3)};
+		minimum.x = std::max<float>(0.0f, std::min<float>(minimum.x, vertexWorld[i].x - 1));
+		minimum.y = std::max<float>(0.0f, std::min<float>(minimum.y, vertexWorld[i].y - 1));
+		maximum.y = std::min<float>(image.height, std::max<float>(maximum.y, vertexWorld[i].y + 1));
+		maximum.x = std::min<float>(image.width, std::max<float>(maximum.x, vertexWorld[i].x + 1));
 	}
-	Vector3f side1 = vertexWorld[1] - vertexWorld[0];
-	Vector3f side2 = vertexWorld[2] - vertexWorld[0];
-	for (int x{minimum.x}; x <= maximum.x; x++)
+	if (((vertexWorld[1] - vertexWorld[0]) ^ (vertexWorld[2] - vertexWorld[0])) * Vector3f(0, 0, 1) >= 0)
 	{
-		for (int y{minimum.y}; y <= maximum.y; y++)
+		for (int x{minimum.x}; x <= maximum.x; x++)
 		{
-			Vector3f point = Vector3f(x, y, 0) - vertexWorld[0];
-			Vector3f parameters = Vector3f(side1.x, side2.x, -point.x) ^ Vector3f(side1.y, side2.y, -point.y);
-			if (parameters.z != 0)
+			for (int y{minimum.y}; y <= maximum.y; y++)
 			{
-				parameters = parameters * (1 / parameters.z);
-				if (parameters.x >= 0 && parameters.y >= 0 && parameters.x + parameters.y <= 1)
+				Vector3f point = Vector3f(x, y, 0) - vertexWorld[0];
+				Vector3f parameters = Vector3f(vertexWorld[1].x - vertexWorld[0].x, vertexWorld[2].x - vertexWorld[0].x, -point.x) ^ Vector3f(vertexWorld[1].y - vertexWorld[0].y, vertexWorld[2].y - vertexWorld[0].y, -point.y);
+				if (parameters.z != 0)
 				{
-					float zDepth = (vertexWorld[0].z + side1.z * parameters.x + side2.z * parameters.y);
-					if (zBuffer.getBuffer(x, y) < zDepth)
+					parameters = parameters * (1 / parameters.z);
+					if (parameters.x >= 0 && parameters.y >= 0 && parameters.x + parameters.y <= 1)
 					{
-						Vector2f texturePosition = (textureCordinates[0] + (textureCordinates[1] - textureCordinates[0]) * parameters.x + (textureCordinates[2] - textureCordinates[0]) * parameters.y);
-						image.setColor(x, y, texture.getColor(texturePosition.x * texture.width, texturePosition.y * texture.height) * intensity);
-						zBuffer.setBuffer(x, y, zDepth);
+
+						float zDepth = (vertexWorld[0].z * (1 - parameters.x - parameters.y) + vertexWorld[1].z * parameters.x + vertexWorld[2].z * parameters.y);
+						if (zBuffer.getBuffer(x, y) < zDepth)
+						{
+							Vector3f pixelNormal = (normals[0] * (1 - parameters.x - parameters.y) + normals[1] * parameters.x + normals[2] * parameters.y);
+							Vector2f texturePosition = (textureCordinates[0] + (textureCordinates[1] - textureCordinates[0]) * parameters.x + (textureCordinates[2] - textureCordinates[0]) * parameters.y);
+							image.setColor(x, y, texture.getColor(texturePosition.x * texture.width, texturePosition.y * texture.height) * (pixelNormal.normalise() * lightDirection));
+							zBuffer.setBuffer(x, y, zDepth);
+						}
 					}
 				}
 			}
